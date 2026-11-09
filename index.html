@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171513">
+  <meta name="description" content="MarDani Luxe — cosmetics, skincare, fragrance and accessories. Beauty Beyond Borders.">
+  <title>MarDani Luxe | Beauty Beyond Borders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="announcement">A considered approach to everyday beauty <span>·</span> Welcome to MarDani Luxe</div>
+  <header class="site-header">
+    <a class="wordmark" href="#" aria-label="MarDani Luxe home">
+      <span class="mark">M<span>✧</span></span>
+      <span class="brand-name">MarDani Luxe</span>
+      <span class="tagline">BEAUTY BEYOND BORDERS</span>
+    </a>
+    <nav class="desktop-nav" aria-label="Main navigation">
+      <a href="#shop">Shop</a><a href="#story">Our story</a><a href="#service">Customer care</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-button" id="searchToggle" aria-label="Search products">⌕</button>
+      <button class="bag-button" id="openCart" aria-label="Open shopping bag">BAG <span id="bagCount">0</span></button>
+      <button class="menu-button" id="menuToggle" aria-label="Open menu">☰</button>
+    </div>
+  </header>
+
+  <div class="search-panel" id="searchPanel" hidden>
+    <input id="searchInput" type="search" placeholder="Search skincare, fragrance, cosmetics…" aria-label="Search products">
+  </div>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">THE MAR DANI LUXE EXPERIENCE</p>
+        <h1>Beauty, with<br><em>intention.</em></h1>
+        <p class="hero-text">Thoughtfully chosen beauty essentials, skincare, fragrance and finishing touches — selected to make every day feel a little more special.</p>
+        <a class="button button-dark" href="#shop">Explore the collection <span>↗</span></a>
+        <p class="hero-note">COSMETICS &nbsp; · &nbsp; SKINCARE &nbsp; · &nbsp; FRAGRANCE &nbsp; · &nbsp; ACCESSORIES</p>
+      </div>
+      <div class="hero-art" role="img" aria-label="Neutral luxury beauty still life">
+        <div class="art-orbit"></div>
+        <div class="art-card art-card-one"><span>THE ART OF</span><strong>Everyday<br>beauty</strong></div>
+        <div class="art-card art-card-two"><span>MAR DANI LUXE</span><strong>BEAUTY<br>BEYOND<br>BORDERS</strong></div>
+        <div class="art-caption">A LITTLE LUXURY, EVERY DAY</div>
+      </div>
+    </section>
+
+    <section class="intro-strip" id="story">
+      <span>01 / OUR PHILOSOPHY</span>
+      <p>Beauty is personal. Our collection is curated to help you find the pieces that feel like <em>you.</em></p>
+      <span class="intro-flourish">✳</span>
+    </section>
+
+    <section class="shop-section" id="shop">
+      <div class="section-heading">
+        <div><p class="eyebrow">DISCOVER MAR DANI LUXE</p><h2>The collection</h2></div>
+        <p class="section-aside">Find your next favourite.</p>
+      </div>
+      <div class="category-tabs" id="categoryTabs">
+        <button class="active" data-category="All">All pieces</button>
+        <button data-category="Skincare">Skincare</button>
+        <button data-category="Cosmetics">Cosmetics</button>
+        <button data-category="Fragrance">Fragrance</button>
+        <button data-category="Accessories">Accessories</button>
+      </div>
+      <div class="product-grid" id="productGrid"></div>
+      <p class="catalogue-note">Our online collection is being prepared. Contact us on WhatsApp for current availability and personalised assistance.</p>
+    </section>
+
+    <section class="service-band" id="service">
+      <div><span class="service-number">01</span><h3>Considered selection</h3><p>Beauty and self-care essentials chosen with care.</p></div>
+      <div><span class="service-number">02</span><h3>Personal service</h3><p>Our team is here to help you find what you need.</p></div>
+      <div><span class="service-number">03</span><h3>Easy ordering</h3><p>Place your order with our team through WhatsApp.</p></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-brand"><span class="brand-name">MarDani Luxe</span><span class="tagline">BEAUTY BEYOND BORDERS</span></div>
+    <div class="footer-links"><a href="#shop">Shop</a><a href="#story">Our story</a><a href="#" id="footerWhatsApp">WhatsApp</a></div>
+    <p>© <span id="year"></span> MarDani Luxe. All rights reserved.</p>
+  </footer>
+
+  <div class="overlay" id="overlay" hidden></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping bag" aria-hidden="true">
+    <div class="drawer-head"><div><p class="eyebrow">YOUR SELECTION</p><h2>Your bag</h2></div><button class="close-button" id="closeCart" aria-label="Close bag">×</button></div>
+    <div id="cartItems" class="cart-items"><p class="empty-cart">Your bag is currently empty.</p></div>
+    <div class="cart-footer"><div class="cart-total"><span>Subtotal</span><strong id="cartTotal">₦0</strong></div><p>Availability and delivery will be confirmed by our team.</p><button class="button button-dark full-width" id="checkoutButton">Continue on WhatsApp <span>↗</span></button></div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="config.js"></script>
+  <script src="products.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
