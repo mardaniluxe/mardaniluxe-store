@@ -1,18 +1,20 @@
-ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Public can read active products"
-ON public.products;
-
-CREATE POLICY "Public can read active products"
-ON public.products
-FOR SELECT TO anon, authenticated
-USING (active = true);
-
-DROP POLICY IF EXISTS "Public can read active categories"
-ON public.categories;
-
-CREATE POLICY "Public can read active categories"
-ON public.categories
-FOR SELECT TO anon, authenticated
-USING (active = true);
+(() => {
+const cfg=window.STORE_CONFIG||{};let products=[],categories=[],cart=[],active="All";
+const grid=document.getElementById("productGrid"),drawer=document.getElementById("cartDrawer"),overlay=document.getElementById("overlay");
+const money=n=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(Number(n||0));
+const toast=m=>{const e=document.getElementById("toast");e.textContent=m;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2500)};
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function loadLib(){return new Promise((ok,no)=>{if(window.supabase?.createClient)return ok();const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function renderCats(){const el=document.getElementById("categoryTabs");const names=["All",...categories.map(c=>c.name)];el.innerHTML=names.map(n=>`<button type="button" data-category="${esc(n)}" class="${n===active?"active":""}">${n==="All"?"All pieces":esc(n)}</button>`).join("");el.querySelectorAll("button").forEach(b=>b.onclick=()=>{active=b.dataset.category;renderCats();renderProducts()})}
+function renderProducts(){const q=(document.getElementById("searchInput").value||"").toLowerCase();const rows=products.filter(p=>(active==="All"||p.category===active)&&`${p.name} ${p.category} ${p.description||""}`.toLowerCase().includes(q));grid.innerHTML=rows.map(p=>{const stock=Number(p.stock_quantity||0),low=Number(p.low_stock_threshold||3),status=stock<=0?"Out of stock":stock<=low?"Few left":"In stock";const photo=p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="image-placeholder"><span>${esc(p.category)}</span></div>`;return `<article class="product-card"><div class="product-image">${photo}</div><div class="product-info"><div><h3>${esc(p.name)}</h3><p>${esc(p.description||"")}</p><small>${status}</small></div><span class="product-price">${money(p.price)}</span></div><button class="add-button" data-add="${p.id}" ${stock<=0?"disabled":""}>${stock<=0?"Unavailable":"Add to bag +"}</button></article>`}).join("")||"<p>No products found. Try another search.</p>";grid.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>add(b.dataset.add))}
+function add(id){const p=products.find(x=>x.id===id),row=cart.find(x=>x.id===id);if(!p)return;if((row?.qty||0)+1>Number(p.stock_quantity||0))return toast("Sorry, that is the available quantity.");row?row.qty++:cart.push({...p,qty:1});renderCart();toast("Added to your bag")}
+function renderCart(){const count=cart.reduce((s,p)=>s+p.qty,0),total=cart.reduce((s,p)=>s+p.qty*Number(p.price),0);document.getElementById("bagCount").textContent=count;document.getElementById("cartTotal").textContent=money(total);document.getElementById("cartItems").innerHTML=cart.length?cart.map(p=>`<div class="cart-row"><div><strong>${esc(p.name)}</strong><small>${money(p.price)} each</small></div><div class="quantity"><button data-dec="${p.id}">−</button><span>${p.qty}</span><button data-inc="${p.id}">+</button></div></div>`).join(""):'<p class="empty-cart">Your bag is currently empty.</p>';document.querySelectorAll("[data-inc]").forEach(b=>b.onclick=()=>qty(b.dataset.inc,1));document.querySelectorAll("[data-dec]").forEach(b=>b.onclick=()=>qty(b.dataset.dec,-1))}
+function qty(id,d){const item=cart.find(p=>p.id===id),p=products.find(x=>x.id===id);if(!item)return;if(d>0&&item.qty+1>Number(p?.stock_quantity||0))return toast("Sorry, that is the available quantity.");item.qty+=d;if(item.qty<=0)cart=cart.filter(x=>x.id!==id);renderCart()}
+function openCart(){drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");overlay.hidden=false}
+function closeCart(){drawer.classList.remove("open");drawer.setAttribute("aria-hidden","true");overlay.hidden=true}
+function checkout(){if(!cart.length)return toast("Your bag is empty");const total=cart.reduce((s,p)=>s+p.qty*Number(p.price),0),lines=cart.map(p=>`• ${p.name} x ${p.qty} — ${money(p.qty*p.price)}`).join("\n"),number=String(cfg.whatsappNumber||"").replace(/\D/g,"");if(!number)return toast("Configure WhatsApp number in config.js");const msg=`Hello MarDani Luxe, I would like to enquire about this order:\n\n${lines}\n\nSubtotal: ${money(total)}\n\nPlease confirm availability, delivery fee and payment instructions.`;window.open(`https://wa.me/${number}?text=${encodeURIComponent(msg)}`,"_blank","noopener")}
+async function start(){if(!cfg.supabaseUrl||!cfg.supabasePublishableKey)throw Error("Missing Supabase settings");await loadLib();const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey);const [c,p]=await Promise.all([db.from("categories").select("id,name,slug,active").eq("active",true).order("name"),db.from("products").select("id,category_id,name,description,price,image_url,stock_quantity,low_stock_threshold,categories(name)").eq("active",true).order("created_at",{ascending:false})]);if(c.error)throw c.error;if(p.error)throw p.error;categories=c.data||[];products=(p.data||[]).map(x=>({...x,category:x.categories?.name||"Other"}));renderCats();renderProducts();renderCart();if(!products.length)toast("Connected! Add products through the admin dashboard.")}
+document.getElementById("openCart").onclick=openCart;document.getElementById("closeCart").onclick=closeCart;overlay.onclick=closeCart;document.getElementById("searchToggle").onclick=()=>{const p=document.getElementById("searchPanel");p.hidden=!p.hidden;if(!p.hidden)document.getElementById("searchInput").focus()};document.getElementById("searchInput").addEventListener("input",renderProducts);document.getElementById("checkoutButton").onclick=checkout;document.getElementById("footerWhatsApp").href=`https://wa.me/${String(cfg.whatsappNumber||"").replace(/\D/g,"")}`;document.getElementById("year").textContent=new Date().getFullYear();
+start().catch(e=>{console.error("MarDani Luxe:",e);toast("Catalogue connection failed. Check database access.");grid.innerHTML="<p>Our collection is temporarily unavailable. Please contact us on WhatsApp.</p>"});
+})();
