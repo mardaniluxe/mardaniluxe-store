@@ -37,3 +37,34 @@
 @media(max-width:650px){.product-modal{grid-template-columns:1fr;max-height:94vh}.detail-image-wrap{min-height:260px;max-height:38vh}.detail-photo{min-height:260px;max-height:38vh}.detail-copy{padding:25px 22px 30px}.detail-copy h2{font-size:30px}}
 
 .detail-image-wrap.zoomed .detail-photo{transform:scale(1.7);cursor:zoom-out}.detail-image-wrap.zoomed{cursor:zoom-out}
+
+
+/* Launch-readiness: readable typography and unmistakable order confirmation */
+body{font-size:16px}
+.announcement{font-size:12px}
+.desktop-nav{font-size:12px}
+.hero-text{font-size:16px;line-height:1.75}
+.hero-note{font-size:12px;line-height:1.6}
+.eyebrow,.intro-strip>span:first-child,.service-number{font-size:12px}
+.category-tabs button{font-size:13px}
+.product-info h3{font-size:18px;line-height:1.35}
+.product-info p{font-size:14px;line-height:1.5}
+.product-info small,.detail-stock{font-size:14px}
+.product-price{font-size:16px;font-weight:600}
+.add-button,.button,.share-product,.whatsapp-alt{font-size:14px;letter-spacing:.06em}
+.view-details{font-size:12px}
+.cart-row small,.cart-footer p,.payment-note,.checkout-panel label{font-size:14px}
+.cart-total{font-size:16px}
+.checkout-panel input,.checkout-panel textarea{font-size:16px;padding:13px}
+.bank-details{font-size:15px;line-height:1.75}
+#checkoutMessage,#receiptMessage,.share-feedback{font-size:14px;line-height:1.5}
+.detail-description{font-size:16px;line-height:1.75}
+.detail-copy h2{line-height:1.2}
+.order-success{margin:0 0 22px;padding:24px 18px;text-align:center;background:#edf7ef;border:2px solid #23834a;border-radius:12px;color:#174b2d}
+.order-success .success-check{display:inline-grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#23834a;color:white;font-size:34px;font-weight:800;margin-bottom:10px}
+.order-success h2{font:700 clamp(23px,5vw,30px)/1.15 var(--sans);letter-spacing:.01em;margin:8px 0 10px;color:#176b38}
+.order-success p{font-size:16px;line-height:1.55;margin:8px 0 14px}
+.order-success .no-repeat{display:block;font-size:15px;line-height:1.4;padding:10px;background:#fff;border-radius:7px;color:#8b2f22}
+.order-reference{font-size:17px;padding:12px;background:#f5f0e9;border-radius:8px;overflow-wrap:anywhere}
+button:disabled{opacity:.6;cursor:not-allowed}
+@media(max-width:760px){.hero-text{font-size:16px}.product-info h3{font-size:17px}.product-price{font-size:16px}.checkout-panel{max-height:72vh}.order-success{padding:20px 14px}}
