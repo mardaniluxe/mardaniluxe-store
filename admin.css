@@ -147,3 +147,8 @@ button[type="button"] {
   .panel { padding: 17px; }
   .stats { grid-template-columns: 1fr; }
 }
+
+.inline-form{display:flex;gap:8px;align-items:center}.inline-form input{flex:1}
+.order-card{border:1px solid var(--line);border-radius:8px;padding:15px;margin:12px 0;background:#fff}.order-card p{font-size:13px;line-height:1.6}.order-card small{color:var(--muted)}.order-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.order-actions button{font-size:12px}.product-row button{white-space:nowrap}
+@media(max-width:700px){.inline-form{display:block}.order-actions button{flex:1}}

@@ -1,173 +1,24 @@
-
 (() => {
-  const cfg = window.STORE_CONFIG || {};
-  const message = (id, text) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-  };
-
-  const client = window.supabase.createClient(
-    cfg.supabaseUrl,
-    cfg.supabasePublishableKey
-  );
-
-  let categories = [];
-  let products = [];
-
-  const loginPanel = document.getElementById("loginPanel");
-  const dashboardPanel = document.getElementById("dashboardPanel");
-
-  async function checkAccess() {
-    const { data: { user } } = await client.auth.getUser();
-
-    if (!user) {
-      loginPanel.hidden = false;
-      dashboardPanel.hidden = true;
-      message("adminStatus", "Signed out");
-      return;
-    }
-
-    const { data: admin, error } = await client
-      .from("admin_users")
-      .select("role")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (error || !admin) {
-      await client.auth.signOut();
-      loginPanel.hidden = false;
-      dashboardPanel.hidden = true;
-      message("loginMessage", "This account is not authorised as a store administrator.");
-      return;
-    }
-
-    loginPanel.hidden = true;
-    dashboardPanel.hidden = false;
-    message("adminStatus", "Signed in · " + admin.role);
-    await loadStore();
-  }
-
-  async function loadStore() {
-    const [catResult, productResult] = await Promise.all([
-      client.from("categories").select("id,name,slug,active").eq("active", true).order("name"),
-      client.from("products").select("id,name,description,price,image_url,stock_quantity,low_stock_threshold,category_id,active").eq("active", true).order("name")
-    ]);
-
-    if (catResult.error || productResult.error) {
-      message("productMessage", "Could not load catalogue. Check administrator database permissions.");
-      return;
-    }
-
-    categories = catResult.data || [];
-    products = productResult.data || [];
-
-    document.getElementById("productCount").textContent = products.length;
-    document.getElementById("categoryCount").textContent = categories.length;
-    document.getElementById("lowStockCount").textContent =
-      products.filter(p => p.stock_quantity <= p.low_stock_threshold).length;
-
-    const select = document.getElementById("productCategory");
-    select.innerHTML = categories.map(c =>
-      `<option value="${c.id}">${escapeHTML(c.name)}</option>`
-    ).join("");
-
-    renderProducts();
-    renderCategories();
-    renderInventory();
-  }
-
-  function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, char => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;",
-      '"': "&quot;", "'": "&#39;"
-    })[char]);
-  }
-
-  function renderProducts() {
-    const list = document.getElementById("productList");
-    list.innerHTML = products.map(p => `
-      <div class="product-row">
-        ${p.image_url ? `<img src="${escapeHTML(p.image_url)}" alt="">` : ""}
-        <div class="product-info">
-          <strong>${escapeHTML(p.name)}</strong>
-          <small>₦${Number(p.price).toLocaleString("en-NG")} · ${p.stock_quantity} units</small>
-        </div>
-        <button type="button" data-edit="${p.id}">Edit</button>
-      </div>
-    `).join("");
-
-    list.querySelectorAll("[data-edit]").forEach(button => {
-      button.addEventListener("click", () => editProduct(button.dataset.edit));
-    });
-  }
-
-  function editProduct(id) {
-    const p = products.find(item => item.id === id);
-    if (!p) return;
-    document.getElementById("productId").value = p.id;
-    document.getElementById("productName").value = p.name;
-    document.getElementById("productCategory").value = p.category_id;
-    document.getElementById("productDescription").value = p.description || "";
-    document.getElementById("productPrice").value = p.price;
-    document.getElementById("productStock").value = p.stock_quantity;
-    document.getElementById("productThreshold").value = p.low_stock_threshold;
-    document.getElementById("pageTitle").textContent = "Edit product";
-    document.getElementById("productForm").scrollIntoView({ behavior: "smooth" });
-  }
-
-  function renderCategories() {
-    document.getElementById("categoryList").innerHTML =
-      categories.map(c => `<p>${escapeHTML(c.name)}</p>`).join("");
-  }
-
-  function renderInventory() {
-    document.getElementById("inventoryList").innerHTML = products.map(p => {
-      const low = p.stock_quantity <= p.low_stock_threshold;
-      return `<p>${escapeHTML(p.name)} — ${p.stock_quantity} units — ${low ? "LOW STOCK" : "In stock"}</p>`;
-    }).join("");
-  }
-
-  document.getElementById("loginForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    message("loginMessage", "Signing in...");
-    const { error } = await client.auth.signInWithPassword({
-      email: document.getElementById("email").value.trim(),
-      password: document.getElementById("password").value
-    });
-    if (error) {
-      message("loginMessage", error.message);
-      return;
-    }
-    await checkAccess();
-  });
-
-  document.getElementById("logoutButton").addEventListener("click", async () => {
-    await client.auth.signOut();
-    location.reload();
-  });
-
-  document.querySelectorAll("[data-view]").forEach(button => {
-    button.addEventListener("click", () => {
-      document.querySelectorAll(".view").forEach(view => view.hidden = true);
-      document.getElementById(button.dataset.view).hidden = false;
-      document.getElementById("pageTitle").textContent = button.textContent;
-      document.querySelectorAll("[data-view]").forEach(b => b.classList.remove("active"));
-      button.classList.add("active");
-    });
-  });
-
-  document.getElementById("resetProduct").addEventListener("click", () => {
-    document.getElementById("productForm").reset();
-    document.getElementById("productId").value = "";
-  });
-
-  document.getElementById("productForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    message("productMessage", "Product saving will be enabled after the secure stock and image policies are installed.");
-  });
-
-  checkAccess().catch(error => {
-    console.error(error);
-    message("adminStatus", "Connection error");
-  });
+const cfg=window.STORE_CONFIG||{},client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey);
+let categories=[],products=[],orders=[];
+const $=id=>document.getElementById(id),say=(id,t)=>{if($(id))$(id).textContent=t};
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=v=>new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:0}).format(Number(v||0));
+async function checkAccess(){const {data:{user}}=await client.auth.getUser();if(!user){$("loginPanel").hidden=false;$("dashboardPanel").hidden=true;say("adminStatus","Signed out");return}const {data:admin,error}=await client.from("admin_users").select("role").eq("user_id",user.id).maybeSingle();if(error||!admin){await client.auth.signOut();$("loginPanel").hidden=false;$("dashboardPanel").hidden=true;say("loginMessage","This account is not authorised as a store administrator.");return}$("loginPanel").hidden=true;$("dashboardPanel").hidden=false;say("adminStatus","Signed in · "+admin.role);await loadStore()}
+async function loadStore(){const [c,p,o]=await Promise.all([client.from("categories").select("id,name,slug,active").order("name"),client.from("products").select("id,name,description,price,image_url,stock_quantity,low_stock_threshold,category_id,active").order("name"),client.from("store_orders").select("id,order_number,customer_name,customer_phone,delivery_address,subtotal,delivery_fee,total,status,payment_status,receipt_path,created_at").order("created_at",{ascending:false}).limit(100)]);if(c.error||p.error)throw c.error||p.error;categories=c.data||[];products=p.data||[];orders=o.data||[];$("productCount").textContent=products.filter(p=>p.active).length;$("categoryCount").textContent=categories.filter(c=>c.active).length;$("lowStockCount").textContent=products.filter(p=>p.active&&p.stock_quantity<=p.low_stock_threshold).length;$("productCategory").innerHTML=categories.filter(c=>c.active).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");renderProducts();renderCategories();renderInventory();renderOrders()}
+function renderProducts(){$("productList").innerHTML=products.map(p=>`<div class="product-row">${p.image_url?`<img src="${esc(p.image_url)}" alt="">`:""}<div class="product-info"><strong>${esc(p.name)}</strong><small>${money(p.price)} · ${p.stock_quantity} units · ${p.active?"Active":"Archived"}</small></div><button type="button" data-edit="${p.id}">Edit</button><button type="button" data-archive="${p.id}">${p.active?"Archive":"Restore"}</button></div>`).join("");$("productList").querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));$("productList").querySelectorAll("[data-archive]").forEach(b=>b.onclick=()=>toggleProduct(b.dataset.archive))}
+function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;$("productId").value=p.id;$("productName").value=p.name;$("productCategory").value=p.category_id;$("productDescription").value=p.description||"";$("productPrice").value=p.price;$("productStock").value=p.stock_quantity;$("productThreshold").value=p.low_stock_threshold;$("pageTitle").textContent="Edit product";document.querySelector('[data-view="products"]').click();$("productForm").scrollIntoView({behavior:"smooth"})}
+async function toggleProduct(id){const p=products.find(x=>x.id===id);if(!p)return;const {error}=await client.from("products").update({active:!p.active}).eq("id",id);if(error)return say("productMessage",error.message);await loadStore();say("productMessage",p.active?"Product archived.":"Product restored.")}
+function renderCategories(){$("categoryList").innerHTML=`<form id="categoryForm" class="inline-form"><input id="categoryName" placeholder="New category name" required><button type="submit">Add category</button></form>`+categories.map(c=>`<div class="product-row"><div class="product-info"><strong>${esc(c.name)}</strong><small>${c.active?"Active":"Archived"}</small></div><button type="button" data-cat-edit="${c.id}">Rename</button><button type="button" data-cat-toggle="${c.id}">${c.active?"Archive":"Restore"}</button></div>`).join("");$("categoryForm").onsubmit=async e=>{e.preventDefault();const name=$("categoryName").value.trim();if(!name)return;const slug=name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");const {error}=await client.from("categories").insert({name,slug,active:true});if(error)return say("categoryMessage",error.message);say("categoryMessage","Category added.");await loadStore()};$("categoryList").querySelectorAll("[data-cat-edit]").forEach(b=>b.onclick=async()=>{const c=categories.find(x=>x.id===b.dataset.catEdit),name=prompt("New category name:",c?.name||"");if(!name?.trim())return;const slug=name.trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");const {error}=await client.from("categories").update({name:name.trim(),slug}).eq("id",c.id);if(error)return say("categoryMessage",error.message);await loadStore()});$("categoryList").querySelectorAll("[data-cat-toggle]").forEach(b=>b.onclick=async()=>{const c=categories.find(x=>x.id===b.dataset.catToggle);if(c.active&&products.some(p=>p.active&&p.category_id===c.id))return say("categoryMessage","Move or archive products in this category before archiving it.");const {error}=await client.from("categories").update({active:!c.active}).eq("id",c.id);if(error)return say("categoryMessage",error.message);await loadStore()})}
+function renderInventory(){$("inventoryList").innerHTML=products.filter(p=>p.active).map(p=>`<div class="product-row"><div class="product-info"><strong>${esc(p.name)}</strong><small>${p.stock_quantity} units · threshold ${p.low_stock_threshold} · ${p.stock_quantity<=p.low_stock_threshold?"LOW STOCK":"In stock"}</small></div><button type="button" data-stock="${p.id}">Adjust stock</button></div>`).join("");$("inventoryList").querySelectorAll("[data-stock]").forEach(b=>b.onclick=async()=>{const p=products.find(x=>x.id===b.dataset.stock),v=prompt("Set new stock quantity:",p.stock_quantity);if(v===null||!Number.isInteger(Number(v))||Number(v)<0)return;const {error}=await client.from("products").update({stock_quantity:Number(v)}).eq("id",p.id);if(error)return say("productMessage",error.message);await loadStore()})}
+function renderOrders(){$("orderList").innerHTML=orders.length?orders.map(o=>`<article class="order-card"><strong>${esc(o.order_number)} · ${esc(o.customer_name)}</strong><p>${esc(o.customer_phone)}<br>${esc(o.delivery_address)}</p><p>${money(o.subtotal)} · ${esc(o.status)} / ${esc(o.payment_status)}</p><small>${new Date(o.created_at).toLocaleString("en-NG")}</small><div class="order-actions">${o.receipt_path?`<button type="button" data-receipt="${o.id}">View receipt</button>`:"No receipt uploaded"}${o.payment_status!=="paid"?`<button type="button" data-approve="${o.id}">Verify & approve payment</button>`:""}${o.status!=="cancelled"?`<button type="button" data-cancel="${o.id}">Cancel order</button>`:""}</div></article>`).join(""):"<p>No orders yet.</p>";$("orderList").querySelectorAll("[data-receipt]").forEach(b=>b.onclick=()=>viewReceipt(b.dataset.receipt));$("orderList").querySelectorAll("[data-approve]").forEach(b=>b.onclick=()=>approveOrder(b.dataset.approve));$("orderList").querySelectorAll("[data-cancel]").forEach(b=>b.onclick=()=>cancelOrder(b.dataset.cancel))}
+async function viewReceipt(id){const o=orders.find(x=>x.id===id);if(!o?.receipt_path)return;const {data,error}=await client.storage.from("payment-receipts").createSignedUrl(o.receipt_path,300);if(error)return alert(error.message);window.open(data.signedUrl,"_blank","noopener")}
+async function approveOrder(id){if(!confirm("Have you independently confirmed the money has arrived in the Moniepoint account? Only approve after checking the actual account balance/transaction."))return;const {error}=await client.rpc("approve_store_order_payment",{p_order_id:id});if(error)return alert(error.message);await loadStore();alert("Payment approved and stock updated.")}
+async function cancelOrder(id){if(!confirm("Cancel this order? Confirmed orders will have stock restored once."))return;const {error}=await client.rpc("cancel_store_order",{p_order_id:id});if(error)return alert(error.message);await loadStore()}
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();say("loginMessage","Signing in…");const {error}=await client.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error)return say("loginMessage",error.message);await checkAccess()});
+$("logoutButton").onclick=async()=>{await client.auth.signOut();location.reload()};
+document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{document.querySelectorAll(".view").forEach(v=>v.hidden=true);$(b.dataset.view).hidden=false;$("pageTitle").textContent=b.textContent;document.querySelectorAll("[data-view]").forEach(x=>x.classList.remove("active"));b.classList.add("active")});
+$("resetProduct").onclick=()=>{$("productForm").reset();$("productId").value="";$("pageTitle").textContent="Products"};
+$("productForm").onsubmit=async e=>{e.preventDefault();const id=$("productId").value,file=$("productImage").files[0],name=$("productName").value.trim(),category_id=$("productCategory").value;let image_url=products.find(p=>p.id===id)?.image_url||null;say("productMessage","Saving product…");try{if(file){if(file.size>5*1024*1024)throw Error("Image must be 5MB or smaller.");if(!file.type.startsWith("image/"))throw Error("Choose an image file.");const path=`${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,"_")}`;const {error:up}=await client.storage.from("mardaniluxe-products").upload(path,file,{upsert:false,contentType:file.type});if(up)throw up;const {data}=client.storage.from("mardaniluxe-products").getPublicUrl(path);image_url=data.publicUrl}const record={name,category_id,description:$("productDescription").value.trim(),price:Number($("productPrice").value),stock_quantity:Number($("productStock").value),low_stock_threshold:Number($("productThreshold").value||3),image_url,active:true};const result=id?await client.from("products").update(record).eq("id",id):await client.from("products").insert(record);if(result.error)throw result.error;say("productMessage","Product saved.");$("productForm").reset();$("productId").value="";await loadStore()}catch(err){say("productMessage",err.message||"Could not save product.")}};
+checkAccess().catch(err=>{console.error(err);say("adminStatus","Connection error");say("productMessage",err.message)});
 })();
