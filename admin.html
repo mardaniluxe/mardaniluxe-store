@@ -14,5 +14,5 @@
 <div id="categories" class="view panel" hidden><h2>Category management</h2><p id="categoryMessage"></p><div id="categoryList"></div></div>
 <div id="orders" class="view panel" hidden><h2>Customer orders</h2><p>Verify the actual incoming transfer in Moniepoint before approving payment.</p><div id="orderList"></div></div>
 <div id="inventory" class="view panel" hidden><h2>Inventory</h2><div id="inventoryList"></div></div>
-<div id="reports" class="view panel" hidden><h2>Reports</h2><p>Order and stock records are available in the Orders and Inventory sections. Sales/profit analytics are a later phase.</p></div>
+<div id="reports" class="view panel" hidden><h2>Store reports</h2><p class="report-note">Based on the latest 100 orders loaded and current active inventory. Sales count only paid, non-cancelled orders. Inventory value is estimated at current selling price, not purchase cost or profit.</p><div id="reportSummary" class="stats report-stats"></div><h3>Order status breakdown</h3><div id="reportStatuses" class="report-list"></div><h3>Low-stock products</h3><div id="reportLowStock" class="report-list"></div><h3>Inventory valuation</h3><div id="reportInventory"></div><button type="button" id="refreshReports">Refresh report data</button></div>
 </section></main></div><script src="admin.js"></script></body></html>

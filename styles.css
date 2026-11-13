@@ -14,3 +14,26 @@
 .checkout-panel label{display:block;font-size:11px;color:var(--muted);margin:12px 0}.checkout-panel input,.checkout-panel textarea{display:block;width:100%;padding:11px;border:1px solid var(--line);margin-top:6px;font:inherit;background:#fffefa}
 .payment-note{font-size:11px;line-height:1.6;color:var(--muted)}.bank-details{background:#f3eee8;padding:15px;margin:14px 0;font-size:12px;line-height:1.7}.whatsapp-alt{width:100%;padding:13px;margin-top:10px;background:transparent;border:1px solid var(--line);font-size:10px;text-transform:uppercase;letter-spacing:.1em}
 #checkoutMessage,#receiptMessage{font-size:11px;color:#8c5e48}
+
+/* Product detail experience */
+.product-open{display:block;width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left}
+.product-open .product-image{cursor:zoom-in}
+.view-details{display:inline-block;margin:8px 0 12px;color:var(--rose);font-size:9px;letter-spacing:.12em;text-transform:uppercase}
+.product-modal-backdrop{position:fixed;inset:0;z-index:30;background:#171513b8;display:grid;place-items:center;padding:22px;overflow:auto}
+.product-modal{position:relative;width:min(900px,100%);max-height:92vh;overflow:auto;background:var(--white);display:grid;grid-template-columns:1fr 1fr;box-shadow:0 25px 90px #0005}
+.modal-close{position:absolute;right:14px;top:10px;z-index:2;border:0;background:#fff;color:var(--ink);font-size:30px;width:40px;height:40px}
+.detail-image-wrap{min-height:440px;background:#eee8e0;display:grid;place-items:center;overflow:hidden}
+.detail-photo{width:100%;height:100%;min-height:440px;max-height:620px;object-fit:contain;cursor:zoom-in;transition:transform .25s}
+.detail-photo:hover{transform:scale(1.06)}
+.detail-placeholder{font:italic 25px var(--serif);color:var(--muted)}
+.detail-copy{padding:58px 42px 40px;align-self:center}
+.detail-copy h2{font:400 38px/1.1 var(--serif);margin:14px 0}
+.detail-price{font:22px var(--serif)}
+.detail-stock{font-size:11px;color:var(--rose);margin:14px 0}
+.detail-description{line-height:1.9;color:var(--muted);white-space:pre-line}
+.detail-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
+.share-product{padding:14px 18px;border:1px solid var(--line);background:transparent;text-transform:uppercase;font-size:9px;letter-spacing:.1em}
+.share-feedback{font-size:11px;color:var(--rose);overflow-wrap:anywhere}
+@media(max-width:650px){.product-modal{grid-template-columns:1fr;max-height:94vh}.detail-image-wrap{min-height:260px;max-height:38vh}.detail-photo{min-height:260px;max-height:38vh}.detail-copy{padding:25px 22px 30px}.detail-copy h2{font-size:30px}}
+
+.detail-image-wrap.zoomed .detail-photo{transform:scale(1.7);cursor:zoom-out}.detail-image-wrap.zoomed{cursor:zoom-out}
