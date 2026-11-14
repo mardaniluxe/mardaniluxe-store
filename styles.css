@@ -68,3 +68,13 @@ body{font-size:16px}
 .order-reference{font-size:17px;padding:12px;background:#f5f0e9;border-radius:8px;overflow-wrap:anywhere}
 button:disabled{opacity:.6;cursor:not-allowed}
 @media(max-width:760px){.hero-text{font-size:16px}.product-info h3{font-size:17px}.product-price{font-size:16px}.checkout-panel{max-height:72vh}.order-success{padding:20px 14px}}
+
+/* Checkout payment instructions: clear and mobile-friendly */
+.checkout-bank{font-size:15px;line-height:1.7;border:1px solid #dfcbb2;border-radius:10px;background:#f8f3ec;padding:17px;margin:16px 0}
+.checkout-bank>strong{display:block;font-size:14px;letter-spacing:.07em;color:#8c653f;margin-bottom:8px}
+.checkout-bank p{margin:8px 0}
+.checkout-bank small{display:block;margin-top:10px;font-size:13px;line-height:1.5}
+.copy-account{padding:9px 13px;border:1px solid #b99770;border-radius:6px;background:#fff;color:#493a2d;font-size:13px;font-weight:600}
+.payment-confirm{display:flex!important;align-items:flex-start;gap:9px;font-size:14px!important;line-height:1.5;color:var(--ink)!important}
+.payment-confirm input{width:18px!important;height:18px;margin:2px 0 0!important;flex:0 0 auto}
+#receiptForm input[type=file]{font-size:14px}
